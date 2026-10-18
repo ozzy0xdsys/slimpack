@@ -1,0 +1,17 @@
+slimpack
+Copyright (c) 2026 slimpack contributors
+Licensed under the MIT License (see LICENSE).
+
+This project bundles third-party source code:
+
+-------------------------------------------------------------------------------
+LZMA SDK (7-Zip) - public domain
+-------------------------------------------------------------------------------
+Files under slimpack/native/lzma/ (LzmaDec.c, LzmaDec.h, 7zTypes.h,
+Compiler.h, Precomp.h, CpuArch.h, 7zWindows.h) are taken from the LZMA SDK by
+Igor Pavlov, obtained from the official 7-Zip source repository
+(https://github.com/ip7z/7zip).
+
+The LZMA SDK is placed in the public domain. slimpack uses only its
+decompressor (LzmaDec) in the one-file launcher stub to decompress the
+appended payload at startup.

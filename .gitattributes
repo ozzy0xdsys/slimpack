@@ -1,0 +1,9 @@
+# Normalize line endings: LF in the repo for text, CRLF for Windows batch.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.c text eol=lf
+*.h text eol=lf
+*.py text eol=lf
+*.exe binary
+*.pyd binary
+*.dll binary

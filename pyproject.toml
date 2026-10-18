@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slimpack"
+version = "0.1.0"
+description = "Pack a Python script into the smallest possible Windows .exe"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "slimpack contributors" }]
+keywords = ["exe", "freeze", "packaging", "pyinstaller", "windows", "bundle"]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = []
+
+[project.optional-dependencies]
+# packaging improves third-party dependency resolution (Requires-Dist markers).
+# slimpack falls back gracefully if it is absent.
+full = ["packaging>=21"]
+
+[project.urls]
+Homepage = "https://github.com/your-username/slimpack"
+Issues = "https://github.com/your-username/slimpack/issues"
+
+[project.scripts]
+slimpack = "slimpack.cli:main"
+
+[tool.setuptools]
+packages = ["slimpack"]
+
+[tool.setuptools.package-data]
+# The C launcher sources are needed at build time by the installed package.
+slimpack = ["native/*.c", "native/lzma/*.c", "native/lzma/*.h"]
