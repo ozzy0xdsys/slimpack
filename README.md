@@ -10,6 +10,7 @@ PyPI packages with C extensions, data files and metadata — unchanged.
 |---|---|---|---|
 | multi-file (local module + stdlib `json`/`math`) | 9.46 MB | **2.25 MB** | **4.2× smaller** |
 | `requests` (urllib3 + certifi data + idna + charset C-ext + ssl) | 16.12 MB | **6.28 MB** | **2.6× smaller** |
+| `numpy` (OpenBLAS DLL in `numpy.libs/`) | 21.29 MB | **11.47 MB** | **1.9× smaller** |
 
 All figures measured on this machine; both tools' executables were run to
 confirm identical behavior.
@@ -168,17 +169,17 @@ Under `tests/`, all built and run end-to-end:
   run with correct output, exit code 0 — including onefile cold extraction and
   cached warm restart.
 * real PyPI packages: `requests` (+ `urllib3`, `certifi`, `idna`,
-  `charset_normalizer`) and `cryptography` (+ `cffi`), covering data files,
-  metadata, dynamically-imported deps, ssl DLLs and a compiled extension.
-* size wins vs PyInstaller: 4.2× (multi-file), 2.6× (`requests`).
+  `charset_normalizer`), `cryptography` (+ `cffi`), and **numpy** — covering
+  data files, metadata, dynamically-imported deps, ssl DLLs, a compiled
+  extension, and a BLAS/LAPACK DLL in a sibling `numpy.libs/` directory loaded
+  via `os.add_dll_directory` (works in onedir *and* cold-start onefile, because
+  slimpack preserves the `numpy/` + `numpy.libs/` layout).
+* size wins vs PyInstaller: 4.2× (multi-file), 2.6× (`requests`), and smaller
+  on numpy too (see the table).
 
 **Not verified here:**
 
 * **Nuitka** was not installed — no direct Nuitka comparison was run.
-* Packages that place C extensions' DLLs in a sibling `name.libs/` directory
-  (e.g. **numpy**, Pillow). The code copies `name.libs` and flattens dependent
-  DLLs into the runtime, but this path wasn't exercised against such a package on
-  this machine (the `cryptography` wheel statically links its native code).
 * 32-bit Python and Python versions other than the 3.14 used here.
 * Antivirus behavior — UPX-compressed binaries are sometimes flagged by AV
   heuristics; use `--no-upx` if that is a concern.
