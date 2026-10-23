@@ -110,6 +110,9 @@ def main(argv=None):
                    help="extra source root for local modules (repeatable)")
     p.add_argument("--exclude", action="append", default=[], metavar="MOD",
                    help="drop a top-level package/module from the bundle (repeatable)")
+    p.add_argument("--add-data", action="append", default=[], metavar="SRC[;DEST]",
+                   help="bundle an extra file/dir into the runtime; DEST defaults "
+                        "to the basename (repeatable)")
     p.add_argument("--report", action="store_true",
                    help="print the size breakdown and compare against PyInstaller")
     p.add_argument("--no-upx", action="store_true", help="do not run UPX")
@@ -127,7 +130,8 @@ def main(argv=None):
     cfg = BuildConfig(
         entry=args.script, output=args.output, onefile=args.onefile,
         trace=args.trace, includes=args.include, paths=args.path,
-        exclude=args.exclude, report=args.report, verbose=args.verbose,
+        exclude=args.exclude, add_data=getattr(args, "add_data", []),
+        report=args.report, verbose=args.verbose,
         keep_build=args.keep_build, no_upx=args.no_upx, scratch=scratch,
     )
     b = Builder(cfg)

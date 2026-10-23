@@ -46,6 +46,7 @@ class BuildConfig:
     includes: list[str] = field(default_factory=list)
     paths: list[str] = field(default_factory=list)
     exclude: list[str] = field(default_factory=list)
+    add_data: list[str] = field(default_factory=list)
     report: bool = False
     verbose: bool = False
     keep_build: bool = False
@@ -93,7 +94,7 @@ def find_upx():
 
 def compile_pyc(src_path: str, name: str) -> bytes:
     """Compile a .py source file to a .pyc payload (optimize=2)."""
-    with open(src_path, "r", encoding="utf-8") as f:
+    with open(src_path, "r", encoding="utf-8-sig") as f:   # utf-8-sig strips a BOM
         source = f.read()
     code = compile(source, name, "exec", optimize=2, dont_inherit=True)
     header = importlib.util.MAGIC_NUMBER + b"\x00" * 12  # flags/mtime/size = 0
@@ -420,6 +421,9 @@ class Builder:
             with open(target, "wb") as f:
                 f.write(data)
 
+        # Extra data requested with --add-data.
+        self._collect_add_data(runtime_dir)
+
         # Follow PE import tables across everything bundled and pull in any
         # still-missing non-system DLL (openssl for _ssl, sqlite3, etc.),
         # flattening it into the runtime root so it loads by name.
@@ -487,7 +491,10 @@ class Builder:
 
     def _copy_tree_verbatim(self, srcdir, dstdir):
         total = 0
-        for root, _dirs, files in os.walk(srcdir):
+        for root, dirs, files in os.walk(srcdir):
+            if "__pycache__" in root.split(os.sep):
+                dirs[:] = []
+                continue
             rel = os.path.relpath(root, srcdir)
             outdir = dstdir if rel == "." else os.path.join(dstdir, rel)
             os.makedirs(outdir, exist_ok=True)
@@ -496,6 +503,26 @@ class Builder:
                 shutil.copy2(os.path.join(root, fn), dst)
                 total += os.path.getsize(dst)
         return total
+
+    def _collect_add_data(self, runtime_dir):
+        """--add-data "SRC[;DEST]": copy a file or directory into the runtime
+        at DEST (default: SRC's basename), verbatim."""
+        for spec in self.cfg.add_data:
+            src, _, dest = spec.partition(";")
+            src = os.path.abspath(src.strip())
+            dest = (dest.strip() or os.path.basename(src.rstrip("/\\")))
+            dest = dest.replace("/", os.sep).replace("\\", os.sep).strip(os.sep)
+            target = os.path.join(runtime_dir, dest)
+            if os.path.isdir(src):
+                sz = self._copy_tree_verbatim(src, target)
+            elif os.path.isfile(src):
+                os.makedirs(os.path.dirname(target) or runtime_dir, exist_ok=True)
+                shutil.copy2(src, target)
+                sz = os.path.getsize(target)
+            else:
+                print(f"[slimpack] --add-data: source not found: {src}")
+                continue
+            self.payload_rows.append((f"{dest}  (added data)", sz))
 
     def _collect_metadata(self, runtime_dir):
         for top in sorted(self.thirdparty_tops):

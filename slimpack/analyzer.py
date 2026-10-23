@@ -131,7 +131,7 @@ class Analyzer:
         if mod.kind not in ("source",) or not mod.origin:
             return
         try:
-            with open(mod.origin, "r", encoding="utf-8") as f:
+            with open(mod.origin, "r", encoding="utf-8-sig") as f:   # tolerate a BOM
                 src = f.read()
         except (OSError, UnicodeDecodeError):
             return

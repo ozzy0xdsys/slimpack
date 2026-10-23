@@ -58,11 +58,30 @@ slimpack app.py --onefile --report    # build + size breakdown + PyInstaller com
 | `--trace` | also **run** the script under an import tracer and bundle every module imported at runtime (catches dynamic imports) |
 | `--include MOD` | force-bundle a module/package (repeatable) |
 | `--exclude MOD` | drop a top-level package/module from the bundle (repeatable) |
+| `--add-data SRC[;DEST]` | bundle an extra file/dir into the runtime (repeatable) |
 | `--path DIR` | extra source root for local modules (repeatable) |
 | `--report` | print the size breakdown and compare against PyInstaller |
 | `--no-upx` | skip UPX |
 | `--keep-build` | keep the intermediate build directory |
 | `-v, --verbose` | show build steps and the report |
+
+---
+
+## Standalone executable (`slimpack.exe`)
+
+A prebuilt `slimpack.exe` is attached to the
+[GitHub releases](https://github.com/ozzy0xdsys/slimpack/releases) — download it
+and run `slimpack.exe myscript.py` without `pip install`.
+
+Because slimpack is a build tool, it still needs a real toolchain on your
+machine: a **Python 3** interpreter to pack from (it reads modules/DLLs from it,
+and the produced `.exe` bundles *that* interpreter) and **MinGW `gcc`** on PATH
+to compile the launcher stub (UPX optional). `slimpack.exe` finds Python via
+`py`/`python` on PATH or `--python <path>`; it then runs the real slimpack under
+that interpreter, so the output is always correct for the Python you point it at.
+
+It was itself built with slimpack (`slimpack_launcher.py` packed with its own
+source via `--add-data`) — the tool packs itself.
 
 ---
 
