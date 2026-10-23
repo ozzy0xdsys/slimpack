@@ -142,22 +142,22 @@ normal.
 
 ---
 
-## Test projects
+## Scenarios it was tested on
 
-Under `tests/`, all built and run end-to-end:
+Each scenario below was built and run end-to-end (onedir and onefile):
 
-* `proj_multifile/` — local `funcs.py` + stdlib. Local-file bundling + stdlib
-  tree-shaking.
-* `proj_dynamic/` — module name built at runtime and imported via
+* **multi-file** — an entry script importing a local module plus stdlib
+  (`json`, `math`): local-file bundling + stdlib tree-shaking.
+* **dynamic import** — a module name built at runtime and imported via
   `importlib.import_module`. Without `--trace` the `.exe` correctly raises
-  `ModuleNotFoundError`; with `--trace` (or `--include plugins`) it prints
-  `dynamic import works!`.
-* `proj_pypi/req_test.py` — `requests`: multi-package collection, certifi's
-  `cacert.pem` **data file**, `importlib.metadata` version lookups, the
-  `charset_normalizer` C extension, `idna` via metadata, and ssl DLLs. Prints
-  real version numbers and a prepared URL.
-* `proj_pypi/crypto_test.py` — `cryptography`: a large Rust `_rust.pyd` plus
-  `cffi` / `_cffi_backend`; computes a SHA-256 and a Fernet round-trip.
+  `ModuleNotFoundError`; with `--trace` (or `--include`) it works.
+* **requests** — multi-package collection, certifi's `cacert.pem` **data
+  file**, `importlib.metadata` version lookups, the `charset_normalizer` C
+  extension, `idna` pulled via metadata, and ssl DLLs.
+* **cryptography** — a large Rust `_rust.pyd` plus `cffi` / `_cffi_backend`;
+  a SHA-256 and a Fernet round-trip.
+* **numpy** — a BLAS/LAPACK DLL in a sibling `numpy.libs/` directory loaded via
+  `os.add_dll_directory`.
 
 ---
 
@@ -165,7 +165,7 @@ Under `tests/`, all built and run end-to-end:
 
 **Verified** (Windows 11, Python 3.14.7, gcc 16.2.0 UCRT, UPX 5.2.1):
 
-* onedir **and** onefile builds of all four test projects compile to `.exe` and
+* onedir **and** onefile builds of every scenario above compile to `.exe` and
   run with correct output, exit code 0 — including onefile cold extraction and
   cached warm restart.
 * real PyPI packages: `requests` (+ `urllib3`, `certifi`, `idna`,
